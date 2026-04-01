@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WeedOut — Autonomous Weed Management A-CPS</title>
+  <meta name="description" content="WeedOut: An Autonomous Weed Sprayer in Smart Agriculture using Semi-Supervised Non-CNN Annotation. IFIP-IoT 2023." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --green: #2d7a3a;
+      --green-light: #4caf50;
+      --green-soft: #e8f5e9;
+      --red: #c0392b;
+      --red-soft: #fdecea;
+      --dark: #1a1a2e;
+      --dark-card: #16213e;
+      --mid: #0f3460;
+      --accent: #e94560;
+      --text: #2c3e50;
+      --text-light: #6c7a89;
+      --border: #e0e6ed;
+      --bg: #f8fafb;
+      --white: #ffffff;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+      --shadow-hover: 0 8px 40px rgba(0,0,0,0.14);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.7;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+    .nav-brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--green);
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-brand span { font-size: 1.3rem; }
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-light);
+      font-size: 0.88rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green); }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, #0d2b1a 0%, #1a4a2a 40%, #0d3b55 100%);
+      color: white;
+      padding: 7rem 2rem 5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234caf50' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      opacity: 0.4;
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid rgba(76, 175, 80, 0.4);
+      color: #a5d6a7;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.5rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+    .hero h1 span { color: #81c784; }
+    .hero-subtitle {
+      font-size: clamp(1rem, 2vw, 1.2rem);
+      color: rgba(255,255,255,0.75);
+      max-width: 680px;
+      margin: 0 auto 2.5rem;
+      font-weight: 300;
+    }
+    .hero-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 26px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: var(--green-light);
+      color: white;
+    }
+    .btn-primary:hover { background: #43a047; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(76,175,80,0.4); }
+    .btn-outline {
+      background: transparent;
+      color: white;
+      border: 1.5px solid rgba(255,255,255,0.45);
+    }
+    .btn-outline:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+    .hero-stats {
+      display: flex;
+      gap: 3rem;
+      justify-content: center;
+      margin-top: 4rem;
+      flex-wrap: wrap;
+    }
+    .stat { text-align: center; }
+    .stat-value {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #81c784;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.6);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-top: 4px;
+    }
+
+    /* ── SECTIONS ── */
+    section {
+      padding: 5rem 2rem;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+    h2 {
+      font-size: clamp(1.7rem, 3vw, 2.3rem);
+      font-weight: 800;
+      color: var(--dark);
+      margin-bottom: 1rem;
+      letter-spacing: -0.02em;
+    }
+    .section-intro {
+      color: var(--text-light);
+      font-size: 1.05rem;
+      max-width: 680px;
+      margin-bottom: 3rem;
+    }
+
+    /* ── PROBLEM CARDS ── */
+    .problem-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .problem-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.8rem;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .problem-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
+    .problem-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .problem-card h3 {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 0.5rem;
+      color: var(--dark);
+    }
+    .problem-card p { font-size: 0.92rem; color: var(--text-light); }
+
+    /* ── PIPELINE ── */
+    .pipeline-bg {
+      background: white;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .pipeline-steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      margin-top: 2.5rem;
+    }
+    .step {
+      display: flex;
+      gap: 1.2rem;
+      align-items: flex-start;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      color: white;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.9rem;
+    }
+    .step-content h3 {
+      font-weight: 700;
+      font-size: 0.98rem;
+      margin-bottom: 0.4rem;
+      color: var(--dark);
+    }
+    .step-content p { font-size: 0.88rem; color: var(--text-light); }
+    .step-tag {
+      display: inline-block;
+      background: var(--green-soft);
+      color: var(--green);
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-top: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* ── ARCH DIAGRAM ── */
+    .arch-diagram {
+      background: var(--dark);
+      border-radius: 16px;
+      padding: 2.5rem;
+      margin-top: 2.5rem;
+      overflow-x: auto;
+    }
+    .arch-diagram pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #a8d5a2;
+      line-height: 1.6;
+      white-space: pre;
+    }
+
+    /* ── RESULTS ── */
+    .results-bg {
+      background: linear-gradient(135deg, #0d2b1a 0%, #1a4a2a 100%);
+    }
+    .results-bg section {
+      max-width: 1100px;
+    }
+    .results-bg h2 { color: white; }
+    .results-bg .section-intro { color: rgba(255,255,255,0.65); }
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .metric-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      padding: 2rem 1.5rem;
+      text-align: center;
+      backdrop-filter: blur(8px);
+      transition: transform 0.2s;
+    }
+    .metric-card:hover { transform: translateY(-4px); }
+    .metric-value {
+      font-size: 3rem;
+      font-weight: 800;
+      color: #81c784;
+      line-height: 1;
+    }
+    .metric-name {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.7);
+      margin-top: 0.6rem;
+      font-weight: 500;
+    }
+    .metric-sub {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.4);
+      margin-top: 0.3rem;
+    }
+
+    /* ── COMPARISON TABLE ── */
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 2rem;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      font-size: 0.88rem;
+    }
+    thead { background: var(--dark); color: white; }
+    thead th {
+      padding: 1rem 1.2rem;
+      text-align: left;
+      font-weight: 600;
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background 0.15s; }
+    tbody tr:hover { background: var(--green-soft); }
+    tbody td { padding: 0.9rem 1.2rem; }
+    tbody tr.highlight-row { background: var(--green-soft); }
+    tbody tr.highlight-row td { font-weight: 600; color: var(--green); }
+    .badge-none {
+      display: inline-block;
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* ── FEATURES SECTION ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2.5rem;
+    }
+    .feature-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      display: flex;
+      gap: 1.2rem;
+      align-items: flex-start;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .feature-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); }
+    .feature-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      background: var(--green-soft);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .feature-card h3 { font-weight: 700; font-size: 0.98rem; margin-bottom: 0.4rem; }
+    .feature-card p { font-size: 0.88rem; color: var(--text-light); }
+
+    /* ── CODE SECTION ── */
+    .code-bg { background: #f0f4f8; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+    .code-block {
+      background: var(--dark);
+      border-radius: 12px;
+      padding: 1.8rem;
+      margin-top: 1.5rem;
+      overflow-x: auto;
+    }
+    .code-block pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: #a8d5a2;
+      line-height: 1.6;
+    }
+    .code-block .comment { color: #6a7f6a; }
+    .code-block .keyword { color: #79b8ff; }
+    .code-block .string { color: #f97583; }
+    .code-block .fn { color: #b392f0; }
+
+    /* ── AUTHORS ── */
+    .authors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+    .author-card {
+      background: white;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 1.8rem 1.5rem;
+      text-align: center;
+      box-shadow: var(--shadow);
+      transition: transform 0.2s;
+    }
+    .author-card:hover { transform: translateY(-3px); }
+    .author-avatar {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--green), var(--green-light));
+      border-radius: 50%;
+      margin: 0 auto 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      color: white;
+      font-weight: 700;
+    }
+    .author-name { font-weight: 700; font-size: 0.98rem; margin-bottom: 0.25rem; }
+    .author-affil { font-size: 0.8rem; color: var(--text-light); }
+    .author-orcid { font-size: 0.75rem; color: var(--green); margin-top: 0.5rem; text-decoration: none; }
+    .author-orcid:hover { text-decoration: underline; }
+
+    /* ── CITATION ── */
+    .citation-box {
+      background: var(--dark);
+      border-radius: 12px;
+      padding: 2rem;
+      margin-top: 2rem;
+      position: relative;
+    }
+    .citation-box pre {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: #a8d5a2;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    .copy-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(76, 175, 80, 0.2);
+      border: 1px solid rgba(76, 175, 80, 0.4);
+      color: #81c784;
+      padding: 6px 14px;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .copy-btn:hover { background: rgba(76, 175, 80, 0.35); }
+
+    /* ── FOOTER ── */
+    footer {
+      background: var(--dark);
+      color: rgba(255,255,255,0.5);
+      text-align: center;
+      padding: 2.5rem;
+      font-size: 0.85rem;
+    }
+    footer a { color: #81c784; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+
+    /* ── DIVIDER ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      nav { padding: 0 1rem; }
+      .nav-links { display: none; }
+      .hero { padding: 5rem 1.2rem 3.5rem; }
+      section { padding: 3.5rem 1.2rem; }
+      .arch-diagram { padding: 1.2rem; }
+      .arch-diagram pre { font-size: 0.68rem; }
+    }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .animate { animation: fadeUp 0.6s ease both; }
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <a class="nav-brand" href="#"><span>🌿</span> WeedOut</a>
+  <ul class="nav-links">
+    <li><a href="#problem">Problem</a></li>
+    <li><a href="#solution">Pipeline</a></li>
+    <li><a href="#results">Results</a></li>
+    <li><a href="#comparison">Comparison</a></li>
+    <li><a href="#citation">Citation</a></li>
+    <li><a href="https://github.com/kirankkethineni/WeedOut" target="_blank">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-badge">IFIP-IoT 2023 · University of North Texas</div>
+  <h1 class="animate">Weed<span>Out</span></h1>
+  <p class="hero-subtitle animate delay-1">
+    An Autonomous Weed Sprayer in Smart Agriculture using Semi-Supervised Non-CNN Annotation.
+    No training data. No large models. One farmer interaction. Complete A-CPS loop.
+  </p>
+  <div class="hero-buttons animate delay-2">
+    <a href="https://github.com/kirankkethineni/WeedOut" class="btn btn-primary" target="_blank">
+      ⭐ View on GitHub
+    </a>
+    <a href="https://github.com/kirankkethineni/WeedOut/blob/main/WeedOut.ipynb" class="btn btn-outline" target="_blank">
+      📓 Open Notebook
+    </a>
+  </div>
+  <div class="hero-stats animate delay-3">
+    <div class="stat">
+      <div class="stat-value">93%</div>
+      <div class="stat-label">Clustering Accuracy</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">0.95</div>
+      <div class="stat-label">Weed F1 Score</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Training Images Needed</div>
+    </div>
+    <div class="stat">
+      <div class="stat-value">1</div>
+      <div class="stat-label">Farmer Interaction</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PROBLEM ── -->
+<section id="problem">
+  <div class="section-label">The Challenge</div>
+  <h2>Why CNN-Based Weed Detection Falls Short</h2>
+  <p class="section-intro">
+    Supervised deep learning approaches require thousands of labeled images, fail to generalize across regions and growth stages, and collapse entirely when confronted with weed species they have never seen.
+  </p>
+  <div class="problem-grid">
+    <div class="problem-card">
+      <div class="problem-icon">📦</div>
+      <h3>Massive Training Data Requirements</h3>
+      <p>CNNs demand thousands of labeled images per crop type, per growth stage, per geographic region — a prohibitive cost for most farmers.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🌍</div>
+      <h3>Geography-Locked Models</h3>
+      <p>The same crop species looks visually different under different lighting, soil color, and climate conditions. A model trained in one region fails in another.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">🌱</div>
+      <h3>Growth Stage Drift</h3>
+      <p>A corn seedling at week 2 looks nothing like the same plant at week 8. Stage-specific models multiply the data collection burden exponentially.</p>
+    </div>
+    <div class="problem-card">
+      <div class="problem-icon">❓</div>
+      <h3>Unknown Weed Species</h3>
+      <p>New or invasive weed species that were never in the training set simply cannot be detected — a critical failure mode in real fields.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── PIPELINE ── -->
+<div class="pipeline-bg">
+<section id="solution">
+  <div class="section-label">The Approach</div>
+  <h2>Shape-Based Semi-Supervised Classification</h2>
+  <p class="section-intro">
+    WeedOut bypasses all of these limitations by classifying crops based on their structural <strong>shape</strong>, not their visual appearance. Shape is invariant to lighting, color, geography, and growth stage. Unknown weeds are handled naturally — anything that doesn't match the primary crop cluster is a weed, regardless of species.
+  </p>
+
+  <div class="pipeline-steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h3>Background Removal</h3>
+        <p>Convert to HSV color space and apply green-range thresholding to isolate all vegetation from soil. Resize to 250×250px for efficiency.</p>
+        <span class="step-tag">HSV Thresholding</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h3>Crop Identification</h3>
+        <p>Two-Pass Connected Component Labeling assigns each distinct plant a unique label. Two passes resolve equivalences so touching blobs share one ID.</p>
+        <span class="step-tag">Connected Component Labeling</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h3>Profile Plot Generation</h3>
+        <p>For each plant, compute a 1D signal of pixel-width vs. height — its structural silhouette. Interpolate all plots to 250 points for uniform comparison.</p>
+        <span class="step-tag">Profile Plots</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h3>DTW-Based Clustering</h3>
+        <p>Dynamic Time Warping computes pairwise shape distances between all profile plots. Low-distance pairs are merged into clusters iteratively until convergence.</p>
+        <span class="step-tag">Dynamic Time Warping</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <h3>Farmer Labels Primary Crop</h3>
+        <p>The farmer sees one sample image from each cluster plus its percentage of total vegetation. One selection — "this is my crop" — is all that's needed.</p>
+        <span class="step-tag">Semi-Supervised</span>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num">6</div>
+      <div class="step-content">
+        <h3>Autonomous Spraying</h3>
+        <p>Weeds are colored red, crops green. The output image — scaled to real farm dimensions — drives the ground rover, which sprays herbicide at every red pixel.</p>
+        <span class="step-tag">A-CPS Actuation</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="arch-diagram">
+    <pre>
+  ┌──────────┐     ┌────────────────────────────┐     ┌───────────────────────┐
+  │  Drone   │     │    Processing Unit         │     │   Farmer Interface    │
+  │          │────▶│  1. Background Removal     │────▶│                       │
+  │  Captures│     │  2. Connected Component    │     │   "Which cluster is   │
+  │  Images  │     │     Labeling               │     │    your primary crop?"│
+  └──────────┘     │  3. Profile Plots          │     └──────────┬────────────┘
+                   │  4. DTW Clustering         │                │
+                   └────────────────────────────┘                │
+                                                                  ▼
+                        ┌────────────────────────────────────────────────┐
+                        │         Annotated Field Image                  │
+                        │   🟢 Green = Primary Crop                      │
+                        │   🔴 Red   = Weed (+ weed pressure %)         │
+                        └───────────────────────┬────────────────────────┘
+                                                │
+                                                ▼
+                        ┌────────────────────────────────────────────────┐
+                        │       Autonomous Weed Sprayer (Rover)          │
+                        │   Scans image pixel-by-pixel, sprays           │
+                        │   herbicide at every red (weed) pixel          │
+                        └────────────────────────────────────────────────┘
+    </pre>
+  </div>
+</section>
+</div>
+
+<!-- ── RESULTS ── -->
+<div class="results-bg">
+<section id="results">
+  <div class="section-label" style="color:#81c784;">Performance</div>
+  <h2>Results</h2>
+  <p class="section-intro">
+    Evaluated on 20 combined farmland images from the Kaggle Crop and Weed Detection Dataset, simulating a small-scale farmland scenario.
+  </p>
+  <div class="metrics-grid">
+    <div class="metric-card">
+      <div class="metric-value">93%</div>
+      <div class="metric-name">Clustering Accuracy</div>
+      <div class="metric-sub">Across 20 simulated farmland images</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">0.80</div>
+      <div class="metric-name">F1 — Primary Crop</div>
+      <div class="metric-sub">Precision/recall balance for crop class</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">0.95</div>
+      <div class="metric-name">F1 — Weeds</div>
+      <div class="metric-sub">High precision in weed identification</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-value">2x</div>
+      <div class="metric-name">Image Passes</div>
+      <div class="metric-sub">Runs on a phone or tablet edge device</div>
+    </div>
+  </div>
+</section>
+</div>
+
+<!-- ── FEATURES ── -->
+<section>
+  <div class="section-label">Key Innovations</div>
+  <h2>What Makes WeedOut Different</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">🏋️</div>
+      <div>
+        <h3>Zero Training Data</h3>
+        <p>No labeled images, no model training, no dataset collection. WeedOut works out of the box on any farm, any crop, any geography.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🌿</div>
+      <div>
+        <h3>Universal Generalization</h3>
+        <p>Shape is invariant to lighting, soil color, growth stage, and geographic location. Works on crops and weeds never seen before.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">👨‍🌾</div>
+      <div>
+        <h3>Minimal Farmer Effort</h3>
+        <p>Only one decision required: which cluster image looks like your crop. Everything else — classification, weed pressure, sprayer control — is automatic.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📱</div>
+      <div>
+        <h3>Edge-Deployable</h3>
+        <p>Only two image passes required. Runs efficiently on a smartphone or tablet in the field without cloud infrastructure.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔴</div>
+      <div>
+        <h3>Unknown Weed Detection</h3>
+        <p>Any plant not matching the primary crop cluster is labeled a weed — automatically handling invasive or novel species the system has never encountered.</p>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div>
+        <h3>Weed Pressure Reporting</h3>
+        <p>Outputs weed types present, their individual percentage of total vegetation, and an overall weed pressure score — actionable intelligence beyond just classification.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── COMPARISON ── -->
+<section id="comparison">
+  <div class="section-label">Benchmarking</div>
+  <h2>Comparison with Prior Work</h2>
+  <p class="section-intro">
+    WeedOut is the first shape-based, assumption-free method that requires no training data and works for all crop types and cultivation patterns.
+  </p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>System</th>
+          <th>Year</th>
+          <th>Assumption Required</th>
+          <th>Features Used</th>
+          <th>Key Limitation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Louargant et al.</td><td>2019</td><td>Row cultivation</td><td>Spatial + spectral</td><td>Specific to vegetation index variation</td>
+        </tr>
+        <tr>
+          <td>Ota et al.</td><td>2022</td><td>Row cultivation</td><td>Spatial + geometric</td><td>Needs more weeds than primary crops</td>
+        </tr>
+        <tr>
+          <td>Bah et al.</td><td>2017</td><td>Row cultivation</td><td>Position + superpixel</td><td>Row-cultivated crops only</td>
+        </tr>
+        <tr>
+          <td>Rani et al.</td><td>2017</td><td>Crop area &gt; weed area</td><td>Pixel area</td><td>Oversized weeds misclassified as crops</td>
+        </tr>
+        <tr>
+          <td>Irias Tejeda et al.</td><td>2019</td><td>Crop area &gt; weed area</td><td>Pixel area</td><td>Oversized weeds misclassified as crops</td>
+        </tr>
+        <tr>
+          <td>Aravind et al.</td><td>2015</td><td>Weed area &gt; crop area</td><td>Pixel area</td><td>Undersized weeds misclassified</td>
+        </tr>
+        <tr>
+          <td>Persson &amp; Astrand</td><td>2008</td><td>None</td><td>Shape (ASM)</td><td>Requires training with crop shapes</td>
+        </tr>
+        <tr class="highlight-row">
+          <td>🌿 <strong>WeedOut (Ours)</strong></td><td><strong>2023</strong></td>
+          <td><span class="badge-none">None</span></td>
+          <td><strong>Shape (profile plots)</strong></td>
+          <td><strong>No training needed; universal coverage</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ── CODE ── -->
+<div class="code-bg">
+<section>
+  <div class="section-label">Quick Start</div>
+  <h2>Run WeedOut</h2>
+  <p class="section-intro">Clone the repo, install dependencies, and run the Jupyter notebook on your field images.</p>
+  <div class="code-block">
+    <pre><span class="comment"># Clone the repository</span>
+git clone https://github.com/kirankkethineni/WeedOut.git
+cd WeedOut
+
+<span class="comment"># Install dependencies</span>
+pip install opencv-python numpy matplotlib scipy pandas scikit-learn
+
+<span class="comment"># Launch the notebook</span>
+jupyter notebook WeedOut.ipynb
+
+<span class="comment"># Place your field image as finalc.jpg in the project root,</span>
+<span class="comment"># then run all cells. At the clustering step, identify which</span>
+<span class="comment"># cluster is your primary crop — that's the only input needed.</span></pre>
+  </div>
+  <p style="margin-top:1.2rem; font-size:0.88rem; color:var(--text-light);">
+    Dataset used in paper: <a href="https://www.kaggle.com/datasets/ravirajsinh45/crop-and-weed-detection-data-with-bounding-boxes" target="_blank" style="color:var(--green);">Kaggle Crop and Weed Detection Dataset ↗</a>
+  </p>
+</section>
+</div>
+
+<!-- ── AUTHORS ── -->
+<section id="authors">
+  <div class="section-label">The Team</div>
+  <h2>Authors</h2>
+  <div class="authors-grid">
+    <div class="author-card">
+      <div class="author-avatar">KK</div>
+      <div class="author-name">Kiran Kumar Kethineni</div>
+      <div class="author-affil">Dept. of CS &amp; Engineering<br/>University of North Texas, USA</div>
+      <a class="author-orcid" href="https://orcid.org/0009-0004-6853-6749" target="_blank">ORCID: 0009-0004-6853-6749</a>
+    </div>
+    <div class="author-card">
+      <div class="author-avatar">AM</div>
+      <div class="author-name">Alakananda Mitra</div>
+      <div class="author-affil">Nebraska Water Center<br/>University of Nebraska-Lincoln, USA</div>
+      <a class="author-orcid" href="https://orcid.org/0000-0002-8796-4819" target="_blank">ORCID: 0000-0002-8796-4819</a>
+    </div>
+    <div class="author-card">
+      <div class="author-avatar">SM</div>
+      <div class="author-name">Saraju P. Mohanty</div>
+      <div class="author-affil">Dept. of CS &amp; Engineering<br/>University of North Texas, USA</div>
+      <a class="author-orcid" href="https://orcid.org/0000-0003-2959-6541" target="_blank">ORCID: 0000-0003-2959-6541</a>
+    </div>
+    <div class="author-card">
+      <div class="author-avatar">EK</div>
+      <div class="author-name">Elias Kougianos</div>
+      <div class="author-affil">Dept. of Electrical Engineering<br/>University of North Texas, USA</div>
+      <a class="author-orcid" href="https://orcid.org/0000-0002-1616-7628" target="_blank">ORCID: 0000-0002-1616-7628</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ── CITATION ── -->
+<section id="citation">
+  <div class="section-label">Academic Use</div>
+  <h2>Citation</h2>
+  <p class="section-intro">If you use WeedOut in your research, please cite our IFIP-IoT 2023 paper.</p>
+  <div class="citation-box">
+    <button class="copy-btn" onclick="
+      navigator.clipboard.writeText(document.querySelector('.citation-box pre').textContent);
+      this.textContent='Copied!';
+      setTimeout(()=>this.textContent='Copy BibTeX',2000);
+    ">Copy BibTeX</button>
+    <pre>@inproceedings{kethineni2023weedout,
+  title     = {WeedOut: An Autonomous Weed Sprayer in Smart Agriculture Framework
+               using Semi-Supervised Non-CNN Annotation},
+  author    = {Kethineni, Kiran Kumar and Mitra, Alakananda and
+               Mohanty, Saraju P. and Kougianos, Elias},
+  booktitle = {IFIP International Internet of Things Conference (IFIP-IoT)},
+  year      = {2023}
+}</pre>
+  </div>
+</section>
+
+<!-- ── FOOTER ── -->
+<footer>
+  <p>
+    WeedOut · Published at <strong>IFIP-IoT 2023</strong> · University of North Texas
+  </p>
+  <p style="margin-top:0.5rem;">
+    <a href="https://github.com/kirankkethineni/WeedOut" target="_blank">GitHub</a> ·
+    <a href="https://github.com/kirankkethineni/WeedOut/blob/main/WeedOut.ipynb" target="_blank">Notebook</a> ·
+    <a href="https://www.kaggle.com/datasets/ravirajsinh45/crop-and-weed-detection-data-with-bounding-boxes" target="_blank">Dataset</a>
+  </p>
+</footer>
+
+</body>
+</html>
