@@ -7,7 +7,7 @@
 [![Python](https://img.shields.io/badge/Python-3.8%2B-yellow?style=for-the-badge&logo=python)](https://python.org)
 [![License](https://img.shields.io/badge/License-MIT-orange?style=for-the-badge)](LICENSE)
 
-**[Project Page](https://kirankkethineni.github.io/WeedOut/) | [Paper (IFIP-IoT 2023)](#citation) | [Notebook](WeedOut.ipynb)**
+**[Project Page](https://kirankkethineni.github.io/WeedOut/) | [Paper (IFIP-IoT 2023)](https://link.springer.com/chapter/10.1007/978-3-031-45878-1_29) | [Notebook](WeedOut.ipynb)**
 
 *An Agriculture Cyber-Physical System (A-CPS) that identifies and suppresses weeds without any prior training data — using only crop shape and a single farmer interaction.*
 
